@@ -137,7 +137,7 @@ void packetLoop(int ethFD)
 		* the Ethernet frame
 		*/
 		int frameLength = recv(ethFD, pktBuffer, 6*2+2+1, MSG_PEEK|MSG_TRUNC);
-
+		printf("Received Ethernet frame with length: %u\n", frameLength);
 		
 	}
 
