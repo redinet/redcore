@@ -90,8 +90,6 @@ int main()
 	/* If the socket was opened */
 	if(sockFD >= 0)
 	{
-		
-	
 		/* Bind the Ethernet interface */
 		int bindStatus = bind(sockFD, &addr, sizeof(addr)); /* TODO: Add bind call */
 
