@@ -118,18 +118,20 @@ int main()
 */
 void packetLoop(int ethFD)
 {
-	/**
-	* Allocate space for the head-bytes
-	*
-	* This is the Ethernet header +
-	* the first byte of the payload
-	* (the version byte of the redPacket)
-	*/
-	char* pktBuffer = malloc(6*2+2+1);
-	/* TODO: Null check for `pktBuffer` */
+	/* Packet buffer space */
+	char* pktBuffer;
 
 	while(isActive)
 	{
+		/**
+		* Allocate space for the head-bytes
+		*
+		* This is the Ethernet header +
+		* the first byte of the payload
+		* (the version byte of the redPacket)
+		*/
+		pktBuffer = malloc(6*2+2+1); /* TODO: Null check for `pktBuffer` */
+		
 		/**
 		* Block to dequeue a packet
 		*
@@ -142,6 +144,38 @@ void packetLoop(int ethFD)
 		/* Get the version number */
 		char redVersion = *(pktBuffer+6*2+2);
 		printf("redPacket version: %u\n", redVersion);
+
+		/* Free packet buffer */
+		free(pktBuffer);
+
+		/* Only continue if the version is 0 */
+		if(!redVersion)
+		{
+			/* Allocate space for redPacket ethHeader|version|src|dst|TTL (14,1,8,8,1) */
+			pktBuffer = malloc(14+1+8+8+1);
+
+			/**
+			* Get the source address, destination address
+			* and the time-to-live value
+			*/
+			long sourceAddress = *(pktBuffer+14+1);
+			long destinationAddress = *(pktBuffer+14+1+8);
+			char ttl = *(pktBuffer+14+1+8+8);
+
+			/* TODO: Destination address handling */
+			/* TODO: Check if the destination address belongs to us */
+			
+			char isDestinationUs = isLocalAddress();
+			
+			/* TODO: Possible source address handling */
+
+			/* TODO: Dependant on destinaiton address, check TTL */
+		}
+		/* If not, then drop the redPacket */
+		else
+		{
+			printf("Dropping redPacket with non-zero version field: %u\n", redVersion);
+		}
 	}
 
 	/* Release heap allocated packet buffer */
