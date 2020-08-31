@@ -47,9 +47,37 @@
 * reading this, make that move - write that code. This isn't "cringe" this is someone
 * telling you real-world stuff and not giving you a Python tutorial. You must love what you
 * want to do in life, else you're utterly screwed in achieving your dreams in it.
+*
+* @author Tristan B. Kildaire (deavmi@disroot.org)
 */
 
+#include<stdio.h>
+
 int main()
+{
+	/* TODO: Setup redctl sock */
+	/* TODO: Spawn a new thread for it */
+
+	/* Bind the Ethernet interface */
+	int ethFD = 0; /* TODO: Add bind call */
+
+	/* If the bind succeeded */
+	if(ethFD > 0)
+	{
+		/* Start the packet loop */
+		packetLoop(ethFD);	
+	}
+	/* If the bind failed */
+	else
+	{
+		printf("Error binding\n");
+	}
+}
+
+/**
+* Ethernet packet reader-reactor loop
+*/
+void packetLoop(int ethFD)
 {
 	
 }
