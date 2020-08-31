@@ -138,7 +138,10 @@ void packetLoop(int ethFD)
 		*/
 		int frameLength = recv(ethFD, pktBuffer, 6*2+2+1, MSG_PEEK|MSG_TRUNC);
 		printf("Received Ethernet frame with length: %u\n", frameLength);
-		
+
+		/* Get the version number */
+		char redVersion = *(pktBuffer+6*2+2);
+		printf("redPacket version: %u\n", redVersion);
 	}
 
 	/* Release heap allocated packet buffer */
