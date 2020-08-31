@@ -126,11 +126,18 @@ void packetLoop(int ethFD)
 	* (the version byte of the redPacket)
 	*/
 	char* pktBuffer = malloc(6*2+2+1);
-
 	/* TODO: Null check for `pktBuffer` */
 
 	while(isActive)
 	{
+		/**
+		* Block to dequeue a packet
+		*
+		* Also returns the full length of
+		* the Ethernet frame
+		*/
+		int frameLength = recv(ethFD, pktBuffer, 6*2+2+1, MSG_PEEK|MSG_TRUNC);
+
 		
 	}
 
