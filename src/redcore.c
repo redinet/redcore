@@ -80,7 +80,7 @@ int main()
 		if(!bindStatus)
 		{
 			/* Start the packet loop */
-			packetLoop(ethFD);
+			packetLoop(sockFD);
 		}
 		/* If the bind failed */
 		else
