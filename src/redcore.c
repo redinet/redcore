@@ -56,6 +56,7 @@
 #include<sys/socket.h>
 #include<linux/if_packet.h>
 #include<arpa/inet.h>
+#include<stdlib.h>
 
 char isActive = 1;
 
@@ -117,8 +118,22 @@ int main()
 */
 void packetLoop(int ethFD)
 {
+	/**
+	* Allocate space for the head-bytes
+	*
+	* This is the Ethernet header +
+	* the first byte of the payload
+	* (the version byte of the redPacket)
+	*/
+	char* pktBuffer = malloc(6*2+2+1);
+
+	/* TODO: Null check for `pktBuffer` */
+
 	while(isActive)
 	{
 		
-	}	
+	}
+
+	/* Release heap allocated packet buffer */
+	free(pktBuffer);
 }
