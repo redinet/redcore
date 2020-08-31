@@ -93,7 +93,7 @@ int main()
 		
 	
 		/* Bind the Ethernet interface */
-		int bindStatus = bind(sockFD, addr, sizeof(addr)); /* TODO: Add bind call */
+		int bindStatus = bind(sockFD, &addr, sizeof(addr)); /* TODO: Add bind call */
 
 		/* If the bind succeeded */
 		if(!bindStatus)
