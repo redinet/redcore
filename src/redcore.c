@@ -52,25 +52,46 @@
 */
 
 #include<stdio.h>
+#include<sys/types.h>
+#include<sys/socket.h>
+
+char isActive = 1;
 
 int main()
 {
 	/* TODO: Setup redctl sock */
 	/* TODO: Spawn a new thread for it */
 
-	/* Bind the Ethernet interface */
-	int ethFD = 0; /* TODO: Add bind call */
+	/**
+	* Create a new socket
+	*
+	* We will specify the EtherType later
+	* when binding
+	*/
+	int sockFD = socket(AF_PACKET, SOCK_RAW, 0);
 
-	/* If the bind succeeded */
-	if(ethFD > 0)
+	/* If the socket was opened */
+	if(sockFD >= 0)
 	{
-		/* Start the packet loop */
-		packetLoop(ethFD);	
+		/* Bind the Ethernet interface */
+		int bindStatus = 0; /* TODO: Add bind call */
+
+		/* If the bind succeeded */
+		if(!bindStatus)
+		{
+			/* Start the packet loop */
+			packetLoop(ethFD);
+		}
+		/* If the bind failed */
+		else
+		{
+			printf("Error binding\n");
+		}	
 	}
-	/* If the bind failed */
+	/* If the socket open failed */
 	else
 	{
-		printf("Error binding\n");
+		printf("Error opening socket\n");
 	}
 }
 
@@ -79,5 +100,8 @@ int main()
 */
 void packetLoop(int ethFD)
 {
-	
+	while(isActive)
+	{
+		
+	}	
 }
