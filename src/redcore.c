@@ -225,12 +225,6 @@ void packetLoop(int ethFD)
 			if(isBroadcastAddress(destinationAddress) || isLocalAddress(destinationAddress))
 			{
 				/* TODO: Implement me */
-
-				/* Allocate space for redPacket ethHeader|version|src|dst|TTL|length (14,1,8,8,1,4) */
-				pktBuffer = malloc(14+1+8+8+1+4);
-
-				/* Place the same ethernet frame into it */
-				recv(ethFD, pktBuffer, 14+1+8+8+1+4, MSG_PEEK|MSG_TRUNC);
 			}
 			/* TODO: Multicast handling */
 			else
