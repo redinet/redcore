@@ -227,6 +227,7 @@ void packetLoop(int ethFD)
 				/* TODO: Implement me */
 			}
 			/* TODO: Multicast handling */
+			/* If the packet wasn't destined to us */
 			else
 			{
 				/* TODO: Check if forwarding is enabled */
