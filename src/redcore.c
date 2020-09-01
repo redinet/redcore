@@ -143,9 +143,10 @@ char isBroadcastAddress(long address)
 * and passes it up to the correct
 * protocol handler
 */
-void ingest(int redType, char* redPayload)
+void ingest(char* pktBuffer)
 {
-	
+	/* Get the redType */
+	int redType = (int*)()
 }
 
 
@@ -190,11 +191,11 @@ void packetLoop(int ethFD)
 		/* Only continue if the version is 0 */
 		if(!redVersion)
 		{
-			/* Allocate space for redPacket ethHeader|version|src|dst|TTL|length (14,1,8,8,1,4) */
-			pktBuffer = malloc(14+1+8+8+1+4);
+			/* Allocate space for redPacket ethHeader|version|src|dst|TTL|type|length (14,1,8,8,1,4,4) */
+			pktBuffer = malloc(14+1+8+8+1+4+4);
 
 			/* Place the same ethernet frame into it */
-			recv(ethFD, pktBuffer, 14+1+8+8+1+4, MSG_PEEK);
+			recv(ethFD, pktBuffer, 14+1+8+8+1+4+4, MSG_PEEK);
 
 			/**
 			* Get the source address, destination address
@@ -204,7 +205,7 @@ void packetLoop(int ethFD)
 			long sourceAddress = *(long*)(pktBuffer+14+1);
 			long destinationAddress = *(long*)(pktBuffer+14+1+8);
 			char ttl = *(pktBuffer+14+1+8+8);
-			int length = *(int*)(pktBuffer+14+1+8+8+1);
+			int length = *(int*)(pktBuffer+14+1+8+8+1+4);
 			free(pktBuffer);
 
 			/**
@@ -224,7 +225,8 @@ void packetLoop(int ethFD)
 			*/
 			if(isBroadcastAddress(destinationAddress) || isLocalAddress(destinationAddress))
 			{
-				/* TODO: Implement me */
+				/* Accept the redPacket into the protocol dispatcher */
+				ingest(pktBuffer);
 			}
 			/* TODO: Multicast handling */
 			/* If the packet wasn't destined to us */
