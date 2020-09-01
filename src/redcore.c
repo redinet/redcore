@@ -138,6 +138,16 @@ char isBroadcastAddress(long address)
 	return 0; /* TODO: Implement me */
 }
 
+/**
+* Accepts a packet into the system
+* and passes it up to the correct
+* protocol handler
+*/
+void ingest(int redType, char* redPayload)
+{
+	
+}
+
 
 /**
 * Ethernet packet reader-reactor loop
@@ -180,16 +190,22 @@ void packetLoop(int ethFD)
 		/* Only continue if the version is 0 */
 		if(!redVersion)
 		{
-			/* Allocate space for redPacket ethHeader|version|src|dst|TTL (14,1,8,8,1) */
-			pktBuffer = malloc(14+1+8+8+1);
+			/* Allocate space for redPacket ethHeader|version|src|dst|TTL|length (14,1,8,8,1,4) */
+			pktBuffer = malloc(14+1+8+8+1+4);
+
+			/* Place the same ethernet frame into it */
+			recv(ethFD, pktBuffer, 14+1+8+8+1+4, MSG_PEEK);
 
 			/**
 			* Get the source address, destination address
-			* and the time-to-live value
+			* and the time-to-live value and the length
+			* value
 			*/
-			long sourceAddress = *(pktBuffer+14+1);
-			long destinationAddress = *(pktBuffer+14+1+8);
+			long sourceAddress = *(long*)(pktBuffer+14+1);
+			long destinationAddress = *(long*)(pktBuffer+14+1+8);
 			char ttl = *(pktBuffer+14+1+8+8);
+			int length = *(int*)(pktBuffer+14+1+8+8+1);
+			free(pktBuffer);
 
 			/* TODO: Destination address handling */
 
@@ -200,6 +216,12 @@ void packetLoop(int ethFD)
 			if(isBroadcastAddress(destinationAddress) || isLocalAddress(destinationAddress))
 			{
 				/* TODO: Implement me */
+
+				/* Allocate space for redPacket ethHeader|version|src|dst|TTL|length (14,1,8,8,1,4) */
+				pktBuffer = malloc(14+1+8+8+1+4);
+
+				/* Place the same ethernet frame into it */
+				recv(ethFD, pktBuffer, 14+1+8+8+1+4, MSG_PEEK|MSG_TRUNC);
 			}
 			/* TODO: Multicast handling */
 			else
