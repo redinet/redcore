@@ -59,6 +59,7 @@
 #include<stdlib.h>
 
 char isActive = 1;
+char isForwarding = 0;
 
 int main()
 {
@@ -114,7 +115,35 @@ int main()
 }
 
 /**
+* Returns true if the given address
+* is an address assigned to this redNode
+*
+* @param true if address is local, false
+* otherwise
+*/
+char isLocalAddress(long address)
+{
+	return 1; /* TODO: Implement me */
+}
+
+/**
+* Returns true if the given address
+* is a broadcast address
+*
+* @param true if address is broadcast,
+* false otherwise
+*/
+char isBroadcastAddress(long address)
+{
+	return 0; /* TODO: Implement me */
+}
+
+
+/**
 * Ethernet packet reader-reactor loop
+*
+* @param ethFD file descriptor of the opened
+* packet socket
 */
 void packetLoop(int ethFD)
 {
@@ -163,9 +192,30 @@ void packetLoop(int ethFD)
 			char ttl = *(pktBuffer+14+1+8+8);
 
 			/* TODO: Destination address handling */
-			/* TODO: Check if the destination address belongs to us */
-			
-			char isDestinationUs = isLocalAddress();
+
+			/**
+			* If the address is a broadcast address
+			* or one of ours
+			*/
+			if(isBroadcastAddress(destinationAddress) || isLocalAddress(destinationAddress))
+			{
+				/* TODO: Implement me */
+			}
+			/* TODO: Multicast handling */
+			else
+			{
+				/* TODO: Check if forwarding is enabled */
+				if(isForwarding)
+				{
+					/* TODO: Implement forwarding */
+				}
+				else
+				{
+					/* Drop it */
+					printf("Received packet with address not destined to us, dropping (forwarding disabled)\n");	
+				}
+			}
+
 			
 			/* TODO: Possible source address handling */
 
