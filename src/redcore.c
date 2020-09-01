@@ -146,7 +146,11 @@ char isBroadcastAddress(long address)
 void ingest(char* pktBuffer)
 {
 	/* Get the redType */
-	int redType = (int*)()
+	int redType = *(int*)(pktBuffer+14+1+8+8+1);
+	printf("redType: %u\n", redType);
+
+	/* TODO: Implement protocol handlers array */
+	/* TODO: Implement the redControl handler */
 }
 
 
