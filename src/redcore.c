@@ -207,6 +207,15 @@ void packetLoop(int ethFD)
 			int length = *(int*)(pktBuffer+14+1+8+8+1);
 			free(pktBuffer);
 
+			/**
+			* Use the length to now read the full redPacket
+			*
+			* We need not peek anymore
+			*/
+			pktBuffer = malloc(14+1+8+8+1+4+length);
+			recv(ethFD, pktBuffer, 14+1+8+8+1+4+length, 0);
+
+
 			/* TODO: Destination address handling */
 
 			/**
@@ -242,6 +251,9 @@ void packetLoop(int ethFD)
 			/* TODO: Possible source address handling */
 
 			/* TODO: Dependant on destinaiton address, check TTL */
+
+			/* TODO: Free */
+			free(pktBuffer);
 		}
 		/* If not, then drop the redPacket */
 		else
@@ -251,5 +263,5 @@ void packetLoop(int ethFD)
 	}
 
 	/* Release heap allocated packet buffer */
-	free(pktBuffer);
+	//free(pktBuffer);
 }
