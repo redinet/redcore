@@ -90,7 +90,7 @@ int main()
 	* which the ethertype is big-endian-encoded
 	* 69 in two bytes.
 	*/
-	addr.sll_protocol = htons(69); 
+	addr.sll_protocol = htons(1569);
 
 	/**
 	* Create a new socket
