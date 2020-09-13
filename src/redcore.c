@@ -149,8 +149,23 @@ void ingest(char* pktBuffer)
 	int redType = *(int*)(pktBuffer+14+1+8+8+1);
 	printf("redType: %u\n", redType);
 
-	/* TODO: Implement protocol handlers array */
+
 	/* TODO: Implement the redControl handler */
+
+	/**
+	* If the protocol type is 0, then
+	* handle the redControl packet
+	*/
+	if(!redType)
+	{
+		/* TODO: Implement */
+	}
+	/* Search for a protocol handler */
+	else
+	{
+		/* TODO: Implement protocol handlers array search */	
+	}
+	
 }
 
 
@@ -211,6 +226,9 @@ void packetLoop(int ethFD)
 			char ttl = *(pktBuffer+14+1+8+8);
 			int length = *(int*)(pktBuffer+14+1+8+8+1+4);
 			free(pktBuffer);
+
+			/* TODO: Byte swap (because red is x86 only) the length to little endian */
+			
 
 			/**
 			* Use the length to now read the full redPacket
