@@ -227,7 +227,7 @@ void packetLoop(int ethFD)
 			int length = *(int*)(pktBuffer+14+1+8+8+1+4);
 			free(pktBuffer);
 
-			/* TODO: Byte swap (because red is x86 only) the length to little endian */
+			/* Byte swap (because red is x86 only) the length to little endian */
 			length = ntohl(length);
 
 			/**
