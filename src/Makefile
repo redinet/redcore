@@ -2,7 +2,7 @@ build: redcore redctl
 	
 
 redcore:
-	gcc redcore.c route.c redpacket.c
+	gcc redcore.c route.c redpacket.c -o redcore
 
 redctl:
 	echo d
