@@ -135,7 +135,8 @@ char isLocalAddress(long address)
 */
 char isBroadcastAddress(long address)
 {
-	return 0; /* TODO: Implement me */
+	/* The broadcast address is all 1-bits/highest-value unsigned long */
+	return address == -1;
 }
 
 /**
@@ -258,6 +259,8 @@ void packetLoop(int ethFD)
 				if(isForwarding)
 				{
 					/* TODO: Implement forwarding */
+
+					/* TODO: Implement ttl check before anything else */
 				}
 				else
 				{
