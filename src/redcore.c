@@ -297,7 +297,4 @@ void packetLoop(int ethFD)
 			printf("Dropping redPacket with non-zero version field: %u\n", redVersion);
 		}
 	}
-
-	/* Release heap allocated packet buffer */
-	//free(pktBuffer);
 }
