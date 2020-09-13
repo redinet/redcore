@@ -221,7 +221,7 @@ void packetLoop(int ethFD)
 		* Also returns the full length of
 		* the Ethernet frame
 		*/
-		int frameLength = recv(ethFD, pktBuffer, 6*2+2+1, MSG_PEEK|MSG_TRUNC);
+		int frameLength = recv(ethFD, pktBuffer, 6*2+2+1, MSG_PEEK|MSG_TRUNC); /* TODO: Do this with peek (to keep it there) and then trunc for length (then re-read) */
 		printf("Received Ethernet frame with length: %u\n", frameLength);
 
 		/* Get the version number */
