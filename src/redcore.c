@@ -78,19 +78,19 @@ int main()
 	/* TODO: Spawn a new thread for it */
 
 	/* TODO: Get information from command line or file */
-	int interfaceNumber = 3;
+	int interfaceNumber = 2;
 
 	/* Setup address information */
 	struct sockaddr_ll addr;
 	addr.sll_family = AF_PACKET;
 	addr.sll_ifindex = interfaceNumber; /* Set interface to use */
-
+	
 	/**
 	* Set EtherType to listen for redPackets
 	* which the ethertype is big-endian-encoded
 	* 69 in two bytes.
 	*/
-	addr.sll_protocol = htonl(1569);
+	addr.sll_protocol = htons(1569);
 
 	/**
 	* Create a new socket
@@ -218,6 +218,7 @@ void packetLoop(int ethFD)
 		* the Ethernet frame from the kernel's
 		* queue for this process.
 		*/
+		printf("Waiting...\n");
 		int frameLength = recv(ethFD, NULL, 0, MSG_PEEK|MSG_TRUNC); /* TODO: Do this with peek (to keep it there) and then trunc for length (then re-read) */
 		printf("Received Ethernet frame with length: %u\n", frameLength);
 
