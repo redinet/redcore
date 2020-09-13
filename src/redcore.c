@@ -58,8 +58,13 @@
 #include<arpa/inet.h>
 #include<stdlib.h>
 
+
+/**
+* Data structures
+*/
 char isActive = 1;
 char isForwarding = 0;
+struct RoutingTable* routingTable;
 
 int main()
 {
@@ -93,13 +98,13 @@ int main()
 	if(sockFD >= 0)
 	{
 		/* Bind the Ethernet interface */
-		int bindStatus = bind(sockFD, &addr, sizeof(addr)); /* TODO: Add bind call */
+		int bindStatus = bind(sockFD, &addr, sizeof(addr));
 
 		/* If the bind succeeded */
 		if(!bindStatus)
 		{
-			/* Start the packet loop */
-			packetLoop(sockFD);
+			/* Start the engine routing */
+			startEngine(sockFD);	
 		}
 		/* If the bind failed */
 		else
@@ -112,6 +117,19 @@ int main()
 	{
 		printf("Error opening socket\n");
 	}
+}
+
+/**
+* Initializes the needed data structures
+* and starts the routing engine
+*/
+void startEngine(int sockFD)
+{
+	/* Allocate a new routing table (TODO: Sanity check on failed malloc) */
+	routingTable = newTable();
+	
+	/* Start the packet loop */
+	packetLoop(sockFD);
 }
 
 /**
