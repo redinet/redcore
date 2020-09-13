@@ -228,7 +228,7 @@ void packetLoop(int ethFD)
 			free(pktBuffer);
 
 			/* TODO: Byte swap (because red is x86 only) the length to little endian */
-			
+			length = ntohl(length);
 
 			/**
 			* Use the length to now read the full redPacket
