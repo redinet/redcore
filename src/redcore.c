@@ -228,7 +228,11 @@ void packetLoop(int ethFD)
 			int length = *(int*)(pktBuffer+14+1+8+8+1+4);
 			free(pktBuffer);
 
-			/* Byte swap (because red is x86 only) the length to little endian */
+			/**
+			* Byte swap to native byte ordering (redNET is
+			* x86 only even though this would remain Big
+			* Endian on other archs
+			*/
 			length = ntohl(length);
 
 			/**
