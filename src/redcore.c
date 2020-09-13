@@ -207,39 +207,36 @@ void packetLoop(int ethFD)
 	while(isActive)
 	{
 		/**
-		* Allocate space for the head-bytes
-		*
-		* This is the Ethernet header +
-		* the first byte of the payload
-		* (the version byte of the redPacket)
-		*/
-		pktBuffer = malloc(6*2+2+1); /* TODO: Null check for `pktBuffer` */
-		
-		/**
 		* Block to dequeue a packet
 		*
-		* Also returns the full length of
-		* the Ethernet frame
+		* This returns the full length of the
+		* Ethernet frame (hence the MSG_TRUNC)
+		* so we need to do this
+		* once before we can do the actual read
+		* hence the MSG_PEEK as to not remove
+		* the Ethernet frame from the kernel's
+		* queue for this process.
 		*/
-		int frameLength = recv(ethFD, pktBuffer, 6*2+2+1, MSG_PEEK|MSG_TRUNC); /* TODO: Do this with peek (to keep it there) and then trunc for length (then re-read) */
+		int frameLength = recv(ethFD, NULL, 0, MSG_PEEK|MSG_TRUNC); /* TODO: Do this with peek (to keep it there) and then trunc for length (then re-read) */
 		printf("Received Ethernet frame with length: %u\n", frameLength);
+
+		/* TODO: Check frameLength for errors */
+
+		/**
+		* Allocate buffer space for the full
+		* Ethernet frame and now read dequeue
+		* the Ethernet frame into it
+		*/
+		pktBuffer = malloc(frameLength); /* TODO: NULL check for malloc */
+		int recvStatus = recv(ethFD, pktBuffer, frameLength, 0); /* TODO: Check returned value */
 
 		/* Get the version number */
 		char redVersion = *(pktBuffer+6*2+2);
 		printf("redPacket version: %u\n", redVersion);
 
-		/* Free packet buffer */
-		free(pktBuffer);
-
 		/* Only continue if the version is 0 */
 		if(!redVersion)
 		{
-			/* Allocate space for redPacket ethHeader|version|src|dst|TTL|type|length (14,1,8,8,1,4,4) */
-			pktBuffer = malloc(14+1+8+8+1+4+4);
-
-			/* Place the same ethernet frame into it */
-			recv(ethFD, pktBuffer, 14+1+8+8+1+4+4, MSG_PEEK);
-
 			/**
 			* Get the source address, destination address
 			* and the time-to-live value and the length
@@ -249,7 +246,6 @@ void packetLoop(int ethFD)
 			long destinationAddress = *(long*)(pktBuffer+14+1+8);
 			char ttl = *(pktBuffer+14+1+8+8);
 			int length = *(int*)(pktBuffer+14+1+8+8+1+4);
-			free(pktBuffer);
 
 			/**
 			* Byte swap to native byte ordering (redNET is
@@ -257,15 +253,6 @@ void packetLoop(int ethFD)
 			* Endian on other archs
 			*/
 			length = ntohl(length);
-
-			/**
-			* Use the length to now read the full redPacket
-			*
-			* We need not peek anymore
-			*/
-			pktBuffer = malloc(14+1+8+8+1+4+length);
-			recv(ethFD, pktBuffer, 14+1+8+8+1+4+length, 0);
-
 
 			/* TODO: Destination address handling */
 
@@ -301,7 +288,7 @@ void packetLoop(int ethFD)
 
 			/* TODO: Dependant on destinaiton address, check TTL */
 
-			/* TODO: Free */
+			/* Free packet buffer */
 			free(pktBuffer);
 		}
 		/* If not, then drop the redPacket */
