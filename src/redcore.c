@@ -231,9 +231,11 @@ void packetLoop(int ethFD)
 		pktBuffer = malloc(frameLength); /* TODO: NULL check for malloc */
 		int recvStatus = recv(ethFD, pktBuffer, frameLength, 0); /* TODO: Check returned value */
 
-		/* TODO: Use new redPacket.h decode function */
+		/* Decode the packet */
 		struct redPacket* rp = decode(pktBuffer+6+6+2);
-		/* TODO: Free `pktBuffer` */
+		
+		/* Free the packet buffer */
+		free(pktBuffer);
 
 		/* Get the version number */
 		char redVersion = rp->version;
@@ -285,9 +287,6 @@ void packetLoop(int ethFD)
 			/* TODO: Possible source address handling */
 
 			/* TODO: Dependant on destinaiton address, check TTL */
-
-			/* Free packet buffer */
-			free(pktBuffer);
 		}
 		/* If not, then drop the redPacket */
 		else
