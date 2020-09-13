@@ -66,6 +66,9 @@ char isActive = 1;
 char isForwarding = 0;
 struct RoutingTable* routingTable;
 
+/**
+* Bare minimum needed prototypes
+*/
 struct RoutingTable* newTable();
 
 int main()
