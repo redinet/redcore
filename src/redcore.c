@@ -78,7 +78,7 @@ int main()
 	/* TODO: Spawn a new thread for it */
 
 	/* TODO: Get information from command line or file */
-	int interfaceNumber = 0;
+	int interfaceNumber = 3;
 
 	/* Setup address information */
 	struct sockaddr_ll addr;
