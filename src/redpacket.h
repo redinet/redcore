@@ -34,3 +34,5 @@ struct redPacket
 	/* Payload */
 	char* payload;
 };
+
+struct redPacket* decode(char*);

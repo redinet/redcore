@@ -58,6 +58,7 @@
 #include<arpa/inet.h>
 #include<stdlib.h>
 #include "route.h"
+#include "redpacket.h"
 
 /**
 * Data structures
@@ -231,6 +232,8 @@ void packetLoop(int ethFD)
 		int recvStatus = recv(ethFD, pktBuffer, frameLength, 0); /* TODO: Check returned value */
 
 		/* TODO: Use new redPacket.h decode function */
+		struct redPacket* rp = decode(pktBuffer+6+6+2);
+		/* TODO: Free `pktBuffer` */
 
 		/* Get the version number */
 		char redVersion = *(pktBuffer+6*2+2);
