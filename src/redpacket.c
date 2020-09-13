@@ -18,7 +18,14 @@
 struct redPacket* decode(char* buffer)
 {
 	/* TODO: Implement me */
-	struct redPacket* packet;
+	/* Allocate the data structure */
+	struct redPacket* packet = malloc(sizeof(struct redPacket));
+
+	/* Decode the length */
+	int length = ntohl(*())
+
+	/* Allocate the payload buffer */
+	packet->payload = malloc()
 
 
 	return packet;
