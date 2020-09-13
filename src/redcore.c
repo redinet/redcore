@@ -236,7 +236,7 @@ void packetLoop(int ethFD)
 		/* TODO: Free `pktBuffer` */
 
 		/* Get the version number */
-		char redVersion = *(pktBuffer+6*2+2);
+		char redVersion = rp->version;
 		printf("redPacket version: %u\n", redVersion);
 
 		/* Only continue if the version is 0 */
@@ -247,17 +247,10 @@ void packetLoop(int ethFD)
 			* and the time-to-live value and the length
 			* value
 			*/
-			long sourceAddress = *(long*)(pktBuffer+14+1);
-			long destinationAddress = *(long*)(pktBuffer+14+1+8);
-			char ttl = *(pktBuffer+14+1+8+8);
-			int length = *(int*)(pktBuffer+14+1+8+8+1+4);
-
-			/**
-			* Byte swap to native byte ordering (redNET is
-			* x86 only even though this would remain Big
-			* Endian on other archs
-			*/
-			length = ntohl(length);
+			long sourceAddress = rp->source;
+			long destinationAddress = rp->destination;
+			char ttl = rp->ttl;
+			int length = rp->length;
 
 			/* TODO: Destination address handling */
 
