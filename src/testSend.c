@@ -10,7 +10,7 @@ int main()
 {
 	struct redPacket* rp = malloc(sizeof(struct redPacket));
 
-	char* bytes = encode(rp);
+//	char* bytes = encode(rp);
 
 
 	/* TODO: Get information from command line or file */
@@ -36,8 +36,8 @@ int main()
 	int bindStatus = bind(sockFD, &addr, sizeof(addr));
 
 	/* Send the Ethernet frame */
-	char* bytesFull = bytes;
-	char eth[] = {-1,-1,-1,-1,-1,-1,0,0,1,2,3,4,*(protocolBytes+2),*(protocolBytes+3),1,1,1,1};
+//	char* bytesFull = bytes;
+	char eth[] = {-1,-1,-1,-1,-1,-1,0,0,1,2,3,4,*(protocolBytes+2),*(protocolBytes+3),0,69,5,4};
 	send(sockFD, eth, 14+4, 0);
 
 }
