@@ -13,15 +13,25 @@ struct Route
 	char* device;
 	char metric;
 
-	/* TODO: Soyurce hint if none specified, we will have to consider the api that will be sued for how it can be set too etc */
+	/**
+	* TODO: Source hint if none specified, we will
+	* have to consider the api that will be used
+	* for how it can be set too etc
+	*/
 	long sourceAddress;
 }
 
 struct RoutingTable
 {
-	/* TODO: Used linked list next time for route entries */
+	/**
+	* TODO: Used linked list next time for route
+	* entries
+	*/
 	int entriesCount;
 	struct Route* routes;
 
-	/* TODO: Maybe also route table names (like to enable switching between them) */
+	/**
+	* TODO: Maybe also route table names (like to
+	* enable switching between them)
+	*/
 }
