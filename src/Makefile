@@ -1,8 +1,11 @@
-build: core
+build: redcore redctl
 	
 
-core:
+redcore:
 	gcc redcore.c route.c redpacket.c
+
+redctl:
+	echo d
 
 testSend:
 	gcc testSend.c redpacket.c -o testSend
