@@ -21,12 +21,32 @@ struct redPacket* decode(char* buffer)
 	/* Allocate the data structure */
 	struct redPacket* packet = malloc(sizeof(struct redPacket));
 
-	/* Decode the length */
-	int length = ntohl(*())
+	/* Decode the version */
+	packet->version = *buffer;
+
+	/* Decode the source address */
+	packet->source = *((long*)(buffer+1));
+
+	/* Decode the destination address */
+	packet->destination = *((long*)(buffer+1+8));
+
+	/* Decode the time-to-live value */
+	packet->ttl = *(buffer+1+8+8);
+
+	/* Decode the protocol type */
+	packet->type = *((int*)(buffer+1+8+8+1));
+
+	/* Decode the length (byte swap it native ordering) */
+	packet->length = ntohl(*(int*)(buffer+1+8+8+1+4));
 
 	/* Allocate the payload buffer */
-	packet->payload = malloc()
+	packet->payload = malloc((unsigned int)packet->length);
 
+	/* Copy over the payload into the buffer */
+	for(unsigned int i = 0; i < packet->length; i++)
+	{
+		*(packet->payload+i) = *(buffer+1+8+8+1+4+4+i);
+	}
 
 	return packet;
 }
