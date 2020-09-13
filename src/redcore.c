@@ -57,7 +57,7 @@
 #include<linux/if_packet.h>
 #include<arpa/inet.h>
 #include<stdlib.h>
-
+#include "route.h"
 
 /**
 * Data structures
@@ -65,6 +65,8 @@
 char isActive = 1;
 char isForwarding = 0;
 struct RoutingTable* routingTable;
+
+struct RoutingTable* newTable();
 
 int main()
 {
