@@ -19,7 +19,7 @@ struct Route
 	* for how it can be set too etc
 	*/
 	long sourceAddress;
-}
+};
 
 struct RoutingTable
 {
@@ -34,4 +34,4 @@ struct RoutingTable
 	* TODO: Maybe also route table names (like to
 	* enable switching between them)
 	*/
-}
+};
