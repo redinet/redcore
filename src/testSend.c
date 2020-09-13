@@ -37,7 +37,7 @@ int main()
 
 	/* Send the Ethernet frame */
 	char* bytesFull = bytes;
-	char eth[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,*(protocolBytes+2),*(protocolBytes+3)};
-	send(sockFD, eth, 14, 0);
+	char eth[] = {-1,-1,-1,-1,-1,-1,0,0,1,2,3,4,*(protocolBytes+2),*(protocolBytes+3),1,1,1,1};
+	send(sockFD, eth, 14+4, 0);
 
 }
