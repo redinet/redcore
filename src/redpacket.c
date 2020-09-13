@@ -33,7 +33,7 @@ struct redPacket* decode(char* buffer)
 */
 char* encode(struct redPacket* packet)
 {
-	/* Allocate the buffer */
+	/* Allocate the buffer (TODO: Malloc failure) */
 	char* buffer = malloc(1+8+8+1+4+4+packet->length);
 
 	/* Encode the version */
@@ -59,5 +59,6 @@ char* encode(struct redPacket* packet)
 	{
 		*(buffer+1+8+8+1+4+4+i) = *(packet->payload+i);
 	}
-	
+
+	return buffer;
 }
