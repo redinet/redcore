@@ -230,6 +230,8 @@ void packetLoop(int ethFD)
 		pktBuffer = malloc(frameLength); /* TODO: NULL check for malloc */
 		int recvStatus = recv(ethFD, pktBuffer, frameLength, 0); /* TODO: Check returned value */
 
+		/* TODO: Use new redPacket.h decode function */
+
 		/* Get the version number */
 		char redVersion = *(pktBuffer+6*2+2);
 		printf("redPacket version: %u\n", redVersion);
