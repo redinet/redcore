@@ -1,4 +1,7 @@
-build:
+build: core
+	
+
+core:
 	gcc redcore.c route.c redpacket.c
 
 testSend:
