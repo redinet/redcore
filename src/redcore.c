@@ -59,6 +59,7 @@
 #include<stdlib.h>
 #include "route.h"
 #include "redpacket.h"
+#include<fcntl.h>
 
 /**
 * Data structures
@@ -68,8 +69,29 @@ char isForwarding = 0;
 struct RoutingTable* routingTable;
 struct HostInfo* hostInfo;
 
+void config(char* filename)
+{
+	/* TODO: Read from the config file */
+	int configFD = open(filename, O_RDONLY);
+
+	if(configFD >= 0)
+	{
+		
+	}
+	else
+	{
+		/* TODO: Error handling (return value) */
+	}
+	
+	/* TODO: Use this */
+	struct if_nameindex* if_nameindex();
+}
+
 int main()
 {
+	/* TODO: Run config (move this elsewhere) */
+	config("core.conf");
+
 	/* TODO: Setup redctl sock */
 	/* TODO: Spawn a new thread for it */
 
