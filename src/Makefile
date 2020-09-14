@@ -5,7 +5,7 @@ redcore:
 	gcc redcore.c route.c redpacket.c -o redcore
 
 redctl:
-	echo d
+	gcc redctl.c -o redctl
 
 testSend:
 	gcc testSend.c redpacket.c -o testSend
