@@ -168,20 +168,15 @@ char isBroadcastAddress(long address)
 * and passes it up to the correct
 * protocol handler
 */
-void ingest(char* pktBuffer)
+void ingest(struct redPacket* rp)
 {
-	/* Get the redType */
-	int redType = *(int*)(pktBuffer+14+1+8+8+1);
-	printf("redType: %u\n", redType);
-
-
 	/* TODO: Implement the redControl handler */
 
 	/**
 	* If the protocol type is 0, then
 	* handle the redControl packet
 	*/
-	if(!redType)
+	if(!rp->type)
 	{
 		/* TODO: Implement */
 	}
@@ -190,7 +185,6 @@ void ingest(char* pktBuffer)
 	{
 		/* TODO: Implement protocol handlers array search */	
 	}
-	
 }
 
 
@@ -270,7 +264,7 @@ void packetLoop(int ethFD)
 			if(isBroadcastAddress(destinationAddress) || isLocalAddress(destinationAddress))
 			{
 				/* Accept the redPacket into the protocol dispatcher */
-				ingest(pktBuffer);
+				ingest(rp);
 			}
 			/* TODO: Multicast handling */
 			/* If the packet wasn't destined to us */
@@ -298,7 +292,7 @@ void packetLoop(int ethFD)
 		/* If not, then drop the redPacket */
 		else
 		{
-			printf("Dropping redPacket with non-zero version field: %u\n", redVersion);
+			printf("Dropping redPacket with non-zero version field: %u\n", rp->version);
 		}
 	}
 }
