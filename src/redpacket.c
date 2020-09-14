@@ -9,6 +9,17 @@
 #include<stdlib.h>
 
 /**
+* Prints out a packet
+*/
+char* printPacket(struct redPacket* rp)
+{
+	char* str = malloc(100); /* TODO: Fix */
+	sprintf(str, "redPacket [V: %lu, Src: %lu, Dst: %lu]", rp->version, rp->source, rp->destination);
+
+	return str;
+}
+
+/**
 * Decodes the given bytes into a redPakcet
 * struct for ease of use.
 *
