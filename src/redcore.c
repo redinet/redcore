@@ -66,11 +66,7 @@
 char isActive = 1;
 char isForwarding = 0;
 struct RoutingTable* routingTable;
-
-/**
-* Bare minimum needed prototypes
-*/
-struct RoutingTable* newTable();
+struct HostInfo* hostInfo;
 
 int main()
 {
@@ -109,6 +105,7 @@ int main()
 		/* If the bind succeeded */
 		if(!bindStatus)
 		{
+			/* TODO: Spawn new process here but with vm sharing , clone_thread too probs */
 			/* Start the engine routing */
 			startEngine(sockFD);	
 		}
@@ -131,6 +128,9 @@ int main()
 */
 void startEngine(int sockFD)
 {
+	/* Allocate host information (TODO: Sanity check on failed malloc) */
+	hostInfo = newHost(); /* TODO: Take in redAddresses */
+
 	/* Allocate a new routing table (TODO: Sanity check on failed malloc) */
 	routingTable = newTable();
 	
@@ -187,6 +187,7 @@ void ingest(struct redPacket* rp)
 	}
 }
 
+/* TODO: Start packet loop per-device on a new thread (CLONE_VM|CLONE_THREAD) */
 
 /**
 * Ethernet packet reader-reactor loop
@@ -245,25 +246,16 @@ void packetLoop(int ethFD)
 		/* Only continue if the version is 0 */
 		if(!rp->version)
 		{
-			/**
-			* Get the source address, destination address
-			* and the time-to-live value and the length
-			* value
-			*/
-			long sourceAddress = rp->source;
-			long destinationAddress = rp->destination;
-			char ttl = rp->ttl;
-			int length = rp->length;
-
 			/* TODO: Destination address handling */
 
 			/**
 			* If the address is a broadcast address
 			* or one of ours
 			*/
-			if(isBroadcastAddress(destinationAddress) || isLocalAddress(destinationAddress))
+			if(isBroadcastAddress(rp->destination) || isLocalAddress(rp->destination))
 			{
 				/* Accept the redPacket into the protocol dispatcher */
+				printf("Packet destined to us\n");
 				ingest(rp);
 			}
 			/* TODO: Multicast handling */
@@ -287,7 +279,7 @@ void packetLoop(int ethFD)
 			
 			/* TODO: Possible source address handling */
 
-			/* TODO: Dependant on destinaiton address, check TTL */
+			/* TODO: Dependant on destination address, check TTL */
 		}
 		/* If not, then drop the redPacket */
 		else
