@@ -218,11 +218,16 @@ void packetLoop(int ethFD)
 		* the Ethernet frame from the kernel's
 		* queue for this process.
 		*/
-		printf("Waiting...\n");
 		int frameLength = recv(ethFD, NULL, 0, MSG_PEEK|MSG_TRUNC); /* TODO: Do this with peek (to keep it there) and then trunc for length (then re-read) */
 		printf("Received Ethernet frame with length: %u\n", frameLength);
 
-		/* TODO: Check frameLength for errors */
+		/* Make sure no receive error occurred */
+		if(frameLength < 0)
+		{
+			printf("recv error");
+			continue;
+		}
+		//else if(frameLength 1+8+8+1+4+4)
 
 		/**
 		* Allocate buffer space for the full
@@ -238,12 +243,13 @@ void packetLoop(int ethFD)
 		/* Free the packet buffer */
 		free(pktBuffer);
 
-		/* Get the version number */
-		char redVersion = rp->version;
-		printf("redPacket version: %u\n", redVersion);
+		/* Print out the redPacket */
+		char* pktDescriptor = printPacket(rp);
+		printf("%s\n", pktDescriptor);
+		free(pktDescriptor);
 
 		/* Only continue if the version is 0 */
-		if(!redVersion)
+		if(!rp->version)
 		{
 			/**
 			* Get the source address, destination address
