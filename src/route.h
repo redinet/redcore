@@ -35,3 +35,5 @@ struct RoutingTable
 	* enable switching between them)
 	*/
 };
+
+struct RoutingTable* newTable();
