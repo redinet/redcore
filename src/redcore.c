@@ -120,7 +120,7 @@ void startup(char** interfaceNames, long count)
 	interfaces = malloc(sizeof(struct redInterface)*count);
 
 	/* Create all interfaces */
-	unsigned long i = 0; /* TODO: Assumption is unsigedn comparator interpretatio */
+	unsigned long i = 0;
 	long interfaceOffset = 0;
 	while(i < count)
 	{
