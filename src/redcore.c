@@ -212,14 +212,14 @@ void startup(char** interfaceNames, long count)
 		// printf("Error opening socket\n");
 	// }
 
-	packetLoop();
+	startEngine();
 }
 
 /**
 * Initializes the needed data structures
 * and starts the routing engine
 */
-void startEngine(int sockFD)
+void startEngine()
 {
 	/* Allocate host information (TODO: Sanity check on failed malloc) */
 	hostInfo = newHost(); /* TODO: Take in redAddresses */
@@ -228,7 +228,7 @@ void startEngine(int sockFD)
 	routingTable = newTable();
 	
 	/* Start the packet loop */
-	packetLoop(sockFD);
+	packetLoop();
 }
 
 /**
@@ -282,8 +282,6 @@ void ingest(struct redPacket* rp)
 	}
 }
 
-/* TODO: Start packet loop per-device on a new thread (CLONE_VM|CLONE_THREAD) */
-
 /**
 * Ethernet packet reader-reactor loop
 *
@@ -314,21 +312,12 @@ void packetLoop()
 		* the Ethernet frame from the kernel's
 		* queue for this process.
 		*/
-		int frameLength = recv(currentInterface.sockFD, NULL, 0, MSG_PEEK|MSG_TRUNC|MSG_DONTWAIT); /* TODO: Do this with peek (to keep it there) and then trunc for length (then re-read) */
+		int frameLength = recv(currentInterface.sockFD, NULL, 0, MSG_PEEK|MSG_TRUNC|MSG_DONTWAIT);
 
 		/* If there was no error */
 		if(frameLength >= (int)0)
 		{
 			printf("Received Ethernet frame with length: %u\n", frameLength);
-
-			/* Make sure no receive error occurred */
-			/* TODO: Remove is useless */
-			if(frameLength < 0)
-			{
-				printf("recv error");
-				continue;
-			}
-			//else if(frameLength 1+8+8+1+4+4)
 
 			/**
 			* Allocate buffer space for the full
