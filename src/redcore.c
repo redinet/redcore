@@ -302,7 +302,7 @@ void packetLoop()
 	while(isActive)
 	{
 		/**
-		* Block to dequeue a packet
+		* TODO: Comment update: Block to dequeue a packet
 		*
 		* This returns the full length of the
 		* Ethernet frame (hence the MSG_TRUNC)
