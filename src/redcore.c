@@ -62,6 +62,9 @@
 #include<fcntl.h>
 #include<sys/errno.h>
 #include "redinterface.h"
+#include<sched.h>
+#include<linux/sched.h>
+#include<sys/mman.h>
 
 /**
 * Data structures
@@ -212,6 +215,10 @@ void startup(char** interfaceNames, long count)
 		// printf("Error opening socket\n");
 	// }
 
+
+
+
+
 	startEngine();
 }
 
@@ -226,10 +233,41 @@ void startEngine()
 
 	/* Allocate a new routing table (TODO: Sanity check on failed malloc) */
 	routingTable = newTable();
+
+	/* Start the processor */
+	startProcessor();
+	//return;
 	
 	/* Start the packet loop */
 	packetLoop();
 }
+
+/**
+* Processor loop
+
+*
+* TODO: To be implemented
+*/
+void processorLoop()
+{
+	
+}
+
+/**
+* Starts the processor
+*/
+void startProcessor()
+{
+	/* Create memory region (and grow it downwards) */
+	void* processorStack = mmap(0, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_GROWSDOWN, -1, 0);
+	printf("bababooey %u\n", processorStack);
+
+	/* Create the new thread (child process in my thread group) */
+	int procPID = clone(&processorLoop, processorStack+4096, CLONE_VM, NULL);
+}
+
+
+
 
 /**
 * Returns true if the given address
