@@ -60,6 +60,7 @@
 #include "route.h"
 #include "redpacket.h"
 #include<fcntl.h>
+#include<sys/errno.h>
 #include "redinterface.h"
 
 /**
@@ -111,6 +112,7 @@ int main(int argc, char** args)
 
 /* The redInterfaces */
 struct redInterface* interfaces;
+long interfaceCount = 0;
 
 void startup(char** interfaceNames, long count)
 {
@@ -155,6 +157,7 @@ void startup(char** interfaceNames, long count)
 		i++;
 	}
 
+	interfaceCount = interfaceOffset;
 
 	/* TODO: Realloc to resize */
 
@@ -208,6 +211,8 @@ void startup(char** interfaceNames, long count)
 	// {
 		// printf("Error opening socket\n");
 	// }
+
+	packetLoop();
 }
 
 /**
@@ -282,13 +287,19 @@ void ingest(struct redPacket* rp)
 /**
 * Ethernet packet reader-reactor loop
 *
-* @param ethFD file descriptor of the opened
-* packet socket
+* It will loop through each interface and if there
+* are no frames available it moves onto the next
+* interface
 */
-void packetLoop(int ethFD)
+void packetLoop()
 {
 	/* Packet buffer space */
 	char* pktBuffer;
+
+	/* Current interface we are on */
+	struct redInterface currentInterface = *interfaces;
+	long curr = 0;
+
 
 	while(isActive)
 	{
@@ -303,78 +314,111 @@ void packetLoop(int ethFD)
 		* the Ethernet frame from the kernel's
 		* queue for this process.
 		*/
-		int frameLength = recv(ethFD, NULL, 0, MSG_PEEK|MSG_TRUNC); /* TODO: Do this with peek (to keep it there) and then trunc for length (then re-read) */
-		printf("Received Ethernet frame with length: %u\n", frameLength);
+		int frameLength = recv(currentInterface.sockFD, NULL, 0, MSG_PEEK|MSG_TRUNC|MSG_DONTWAIT); /* TODO: Do this with peek (to keep it there) and then trunc for length (then re-read) */
 
-		/* Make sure no receive error occurred */
-		if(frameLength < 0)
+		/* If there was no error */
+		if(frameLength >= (int)0)
 		{
-			printf("recv error");
-			continue;
-		}
-		//else if(frameLength 1+8+8+1+4+4)
+			printf("Received Ethernet frame with length: %u\n", frameLength);
 
-		/**
-		* Allocate buffer space for the full
-		* Ethernet frame and now read dequeue
-		* the Ethernet frame into it
-		*/
-		pktBuffer = malloc(frameLength); /* TODO: NULL check for malloc */
-		int recvStatus = recv(ethFD, pktBuffer, frameLength, 0); /* TODO: Check returned value */
-
-		/* Decode the packet */
-		struct redPacket* rp = decode(pktBuffer+6+6+2);
-		
-		/* Free the packet buffer */
-		free(pktBuffer);
-
-		/* Print out the redPacket */
-		char* pktDescriptor = printPacket(rp);
-		printf("%s\n", pktDescriptor);
-		free(pktDescriptor);
-
-		/* Only continue if the version is 0 */
-		if(!rp->version)
-		{
-			/* TODO: Destination address handling */
+			/* Make sure no receive error occurred */
+			/* TODO: Remove is useless */
+			if(frameLength < 0)
+			{
+				printf("recv error");
+				continue;
+			}
+			//else if(frameLength 1+8+8+1+4+4)
 
 			/**
-			* If the address is a broadcast address
-			* or one of ours
+			* Allocate buffer space for the full
+			* Ethernet frame and now read dequeue
+			* the Ethernet frame into it
 			*/
-			if(isBroadcastAddress(rp->destination) || isLocalAddress(rp->destination))
-			{
-				/* Accept the redPacket into the protocol dispatcher */
-				printf("Packet destined to us\n");
-				ingest(rp);
-			}
-			/* TODO: Multicast handling */
-			/* If the packet wasn't destined to us */
-			else
-			{
-				/* TODO: Check if forwarding is enabled */
-				if(isForwarding)
-				{
-					/* TODO: Implement forwarding */
+			pktBuffer = malloc(frameLength); /* TODO: NULL check for malloc */
+			int recvStatus = recv(currentInterface.sockFD, pktBuffer, frameLength, 0); /* TODO: Check returned value */
 
-					/* TODO: Implement ttl check before anything else */
+			/* Decode the packet */
+			struct redPacket* rp = decode(pktBuffer+6+6+2);
+			
+			/* Free the packet buffer */
+			free(pktBuffer);
+
+			/* Print out the redPacket */
+			char* pktDescriptor = printPacket(rp);
+			printf("%s\n", pktDescriptor);
+			free(pktDescriptor);
+
+			/* Only continue if the version is 0 */
+			if(!rp->version)
+			{
+				/* TODO: Destination address handling */
+
+				/**
+				* If the address is a broadcast address
+				* or one of ours
+				*/
+				if(isBroadcastAddress(rp->destination) || isLocalAddress(rp->destination))
+				{
+					/* Accept the redPacket into the protocol dispatcher */
+					printf("Packet destined to us\n");
+					ingest(rp);
 				}
+				/* TODO: Multicast handling */
+				/* If the packet wasn't destined to us */
 				else
 				{
-					/* Drop it */
-					printf("Received packet with address not destined to us, dropping (forwarding disabled)\n");	
+					/* TODO: Check if forwarding is enabled */
+					if(isForwarding)
+					{
+						/* TODO: Implement forwarding */
+
+						/* TODO: Implement ttl check before anything else */
+					}
+					else
+					{
+						/* Drop it */
+						printf("Received packet with address not destined to us, dropping (forwarding disabled)\n");	
+					}
 				}
+
+				
+				/* TODO: Possible source address handling */
+
+				/* TODO: Dependant on destination address, check TTL */
 			}
-
-			
-			/* TODO: Possible source address handling */
-
-			/* TODO: Dependant on destination address, check TTL */
+			/* If not, then drop the redPacket */
+			else
+			{
+				printf("Dropping redPacket with non-zero version field: %u\n", rp->version);
+			}
 		}
-		/* If not, then drop the redPacket */
+		/* If there was an error */
 		else
 		{
-			printf("Dropping redPacket with non-zero version field: %u\n", rp->version);
+			if(errno == EWOULDBLOCK || errno == EAGAIN)
+			{
+			//	printf("Would block\n");	
+			}
+			else
+			{
+			//	printf("Error happened\n");
+			}
 		}
+
+		/* Increment the current interface position */
+		curr++;
+
+		/* If we are at the interface count then we have ended */
+		if(curr == interfaceCount)
+		{
+			curr = 0;
+		}
+		else
+		{
+			
+		}
+
+		currentInterface = *(interfaces+curr);
 	}
 }
