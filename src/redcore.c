@@ -74,6 +74,9 @@ char isForwarding = 0;
 struct RoutingTable* routingTable;
 struct HostInfo* hostInfo;
 
+
+char startProcessor();
+
 void config(char* filename)
 {
 	/* TODO: Read from the config file */
@@ -125,7 +128,7 @@ void startup(char** interfaceNames, long count)
 	/* Create all interfaces */
 	unsigned long i = 0;
 	long interfaceOffset = 0;
-	while(i < count)
+	while(i < (unsigned long)count)
 	{
 		/* Get the current interface's name */
 		char* currentInterfaceName = *(interfaceNames+i);
@@ -235,11 +238,15 @@ void startEngine()
 	routingTable = newTable();
 
 	/* Start the processor */
-	startProcessor();
-	//return;
-	
-	/* Start the packet loop */
-	packetLoop();
+	if(startProcessor())
+	{
+		/* Start the packet loop */
+		packetLoop();
+	}
+	else
+	{
+		/* TODO: Tidy up, error handling */
+	}	
 }
 
 /**
@@ -256,14 +263,25 @@ void processorLoop()
 /**
 * Starts the processor
 */
-void startProcessor()
+char startProcessor()
 {
 	/* Create memory region (and grow it downwards) */
-	void* processorStack = mmap(0, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_GROWSDOWN, -1, 0);
-	printf("bababooey %u\n", processorStack);
+	void* processorStack = mmap(0, 4096, PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_GROWSDOWN, -1, 0);
 
-	/* Create the new thread (child process in my thread group) */
-	int procPID = clone(&processorLoop, processorStack+4096, CLONE_VM, NULL);
+	/* If the memory map was successful */
+	if(processorStack != (long)-1)
+	{
+		/* Create the new thread (child process in my thread group) */
+		int procPID = clone(&processorLoop, processorStack+4096, CLONE_VM|CLONE_THREAD, NULL);
+
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+
+	
 }
 
 
@@ -350,10 +368,10 @@ void packetLoop()
 		* the Ethernet frame from the kernel's
 		* queue for this process.
 		*/
-		int frameLength = recv(currentInterface.sockFD, NULL, 0, MSG_PEEK|MSG_TRUNC|MSG_DONTWAIT);
+		long frameLength = recv(currentInterface.sockFD, NULL, 0, MSG_PEEK|MSG_TRUNC|MSG_DONTWAIT);
 
 		/* If there was no error */
-		if(frameLength >= (int)0)
+		if(frameLength >= (long)0)
 		{
 			printf("Received Ethernet frame with length: %u\n", frameLength);
 
