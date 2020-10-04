@@ -87,11 +87,32 @@ void config(char* filename)
 	struct if_nameindex* if_nameindex();
 }
 
-int main()
+/* List of interface names to run on*/
+char** interfaceNames;
+
+int main(int argc, char** args)
 {
 	/* TODO: Run config (move this elsewhere) */
-	config("core.conf");
+	//config("core.conf");
 
+	/* If there are interfaces specified */
+	if(argc > 1)
+	{
+		interfaceNames = args+1;
+	}
+	/* If there are no interfaces specified */
+	else
+	{
+		printf("No interfaces to run on have been specified\n");
+		return;
+	}
+
+	/* Start up the redCore daemon */
+	startup();
+}
+
+void startup()
+{
 	/* TODO: Setup redctl sock */
 	/* TODO: Spawn a new thread for it */
 

@@ -6,7 +6,7 @@ clean:
 	rm testSend
 	
 redcore:
-	gcc redcore.c route.c redpacket.c redhost.c -o redcore
+	gcc redcore.c route.c redpacket.c redhost.c redinterface.c -o redcore
 
 redctl:
 	gcc redctl.c -o redctl
