@@ -60,6 +60,7 @@
 #include "route.h"
 #include "redpacket.h"
 #include<fcntl.h>
+#include "redinterface.h"
 
 /**
 * Data structures
@@ -98,71 +99,115 @@ int main(int argc, char** args)
 	/* If there are interfaces specified */
 	if(argc > 1)
 	{
-		interfaceNames = args+1;
+		/* Start up the redCore daemon */
+		startup(args+1, argc-1);
 	}
 	/* If there are no interfaces specified */
 	else
 	{
 		printf("No interfaces to run on have been specified\n");
-		return;
 	}
-
-	/* Start up the redCore daemon */
-	startup();
 }
 
-void startup()
+/* The redInterfaces */
+struct redInterface* interfaces;
+
+void startup(char** interfaceNames, long count)
 {
+	/* Allocate redInterface */
+	interfaces = malloc(sizeof(struct redInterface)*count);
+
+	/* Create all interfaces */
+	unsigned long i = 0; /* TODO: Assumption is unsigedn comparator interpretatio */
+	long interfaceOffset = 0;
+	while(i < count)
+	{
+		/* Get the current interface's name */
+		char* currentInterfaceName = *(interfaceNames+i);
+		printf("Setting up interface '%s'...\n", currentInterfaceName);
+
+		/* Get the interface's index */
+		int if_index = if_nametoindex(currentInterfaceName);
+
+		/* Only proceed if the interface exists */
+		if(if_index)
+		{
+			printf("Interface index: %u\n", if_index);
+
+			struct redInterface* newInterface = createInterface(if_index);
+			if(newInterface)
+			{
+				*(interfaces+interfaceOffset) = *newInterface;
+				interfaceOffset++;	
+			}
+			else
+			{
+				printf("Failure to setup PACKET interface for %u!\n", if_index);
+			}
+		}
+		else
+		{
+			printf("Invalid interface '%s'!\n", currentInterfaceName);
+		}
+
+		
+		
+		i++;
+	}
+
+
+	/* TODO: Realloc to resize */
+
 	/* TODO: Setup redctl sock */
 	/* TODO: Spawn a new thread for it */
 
 	/* TODO: Get information from command line or file */
-	int interfaceNumber = 1;
-
-	/* Setup address information */
-	struct sockaddr_ll addr;
-	addr.sll_family = AF_PACKET;
-	addr.sll_ifindex = interfaceNumber; /* Set interface to use */
-	
-	/**
-	* Set EtherType to listen for redPackets
-	* which the ethertype is big-endian-encoded
-	* 69 in two bytes.
-	*/
-	addr.sll_protocol = htons(1569);
-
-	/**
-	* Create a new socket
-	*
-	* We will specify the EtherType later
-	* when binding
-	*/
-	int sockFD = socket(AF_PACKET, SOCK_RAW, 0);
-
-	/* If the socket was opened */
-	if(sockFD >= 0)
-	{
-		/* Bind the Ethernet interface */
-		int bindStatus = bind(sockFD, &addr, sizeof(addr));
-
-		/* If the bind succeeded */
-		if(!bindStatus)
-		{
-			/* TODO: Spawn new process here but with vm sharing , clone_thread too probs */
-			/* Start the engine routing */
-			startEngine(sockFD);	
-		}
-		/* If the bind failed */
-		else
-		{
-			printf("Error binding socket\n");
-		}	
-	}
-	/* If the socket open failed */
-	else
-	{
-		printf("Error opening socket\n");
-	}
+	// int interfaceNumber = 1;
+// 
+	// /* Setup address information */
+	// struct sockaddr_ll addr;
+	// addr.sll_family = AF_PACKET;
+	// addr.sll_ifindex = interfaceNumber; /* Set interface to use */
+	// 
+	// /**
+	// * Set EtherType to listen for redPackets
+	// * which the ethertype is big-endian-encoded
+	// * 69 in two bytes.
+	// */
+	// addr.sll_protocol = htons(1569);
+// 
+	// /**
+	// * Create a new socket
+	// *
+	// * We will specify the EtherType later
+	// * when binding
+	// */
+	// int sockFD = socket(AF_PACKET, SOCK_RAW, 0);
+// 
+	// /* If the socket was opened */
+	// if(sockFD >= 0)
+	// {
+		// /* Bind the Ethernet interface */
+		// int bindStatus = bind(sockFD, &addr, sizeof(addr));
+// 
+		// /* If the bind succeeded */
+		// if(!bindStatus)
+		// {
+			// /* TODO: Spawn new process here but with vm sharing , clone_thread too probs */
+			// /* Start the engine routing */
+			// startEngine(sockFD);
+		// }
+		// /* If the bind failed */
+		// else
+		// {
+			// printf("Error binding socket\n");
+		// }
+	// }
+	// /* If the socket open failed */
+	// else
+	// {
+		// printf("Error opening socket\n");
+	// }
 }
 
 /**
