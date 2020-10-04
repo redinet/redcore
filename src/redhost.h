@@ -22,3 +22,5 @@ struct HostInfo
 	long subnet;
 	long mask;
 };
+
+struct HostInfo* newHost();

@@ -65,6 +65,17 @@
 #include<sched.h>
 #include<linux/sched.h>
 #include<sys/mman.h>
+#include <net/if.h>
+#include "redhost.h"
+
+/**
+* Prototypes (TODO: Own header file)
+*/
+void startEngine();
+char startProcessor();
+void processorLoop();
+void packetLoop();
+void startup(char**, long);
 
 /**
 * Data structures
@@ -75,7 +86,8 @@ struct RoutingTable* routingTable;
 struct HostInfo* hostInfo;
 
 
-char startProcessor();
+
+
 
 void config(char* filename)
 {

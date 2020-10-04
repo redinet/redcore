@@ -7,6 +7,7 @@
 #include "redpacket.h"
 #include<arpa/inet.h>
 #include<stdlib.h>
+#include<stdio.h>
 
 /**
 * Prints out a packet

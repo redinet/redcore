@@ -36,3 +36,4 @@ struct redPacket
 };
 
 struct redPacket* decode(char*);
+char* printPacket(struct redPacket*);

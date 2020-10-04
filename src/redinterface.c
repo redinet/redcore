@@ -15,6 +15,7 @@
 #include<stdio.h>
 #include "redpacket.h"
 #include "redinterface.h"
+#include<stdlib.h>
 
 /**
 * Given the interface index this will
