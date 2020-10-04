@@ -257,7 +257,11 @@ void startEngine()
 */
 void processorLoop()
 {
-	
+	printf("bruh\n");
+	while(1)
+	{
+		//printf("Bababooey\n");
+	}
 }
 
 /**
@@ -266,13 +270,14 @@ void processorLoop()
 char startProcessor()
 {
 	/* Create memory region (and grow it downwards) */
-	void* processorStack = mmap(0, 4096, PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_GROWSDOWN, -1, 0);
+	void* processorStack = mmap(0, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_GROWSDOWN, -1, 0);
 
 	/* If the memory map was successful */
 	if(processorStack != (long)-1)
 	{
-		/* Create the new thread (child process in my thread group) */
-		int procPID = clone(&processorLoop, processorStack+4096, CLONE_VM|CLONE_THREAD, NULL);
+		/* Create the new thread (child process in my thread group) TODO: Add CLONE_THREAD */
+		int procPID = clone(&processorLoop, processorStack+4096, CLONE_VM, NULL);
+		printf("bababba %u\n", procPID);
 
 		return 1;
 	}
