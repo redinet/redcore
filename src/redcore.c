@@ -376,7 +376,7 @@ void packetLoop()
 		long frameLength = recv(currentInterface.sockFD, NULL, 0, MSG_PEEK|MSG_TRUNC|MSG_DONTWAIT);
 
 		/* If there was no error */
-		if(frameLength >= (long)0)
+		if(frameLength >= 0)
 		{
 			printf("Received Ethernet frame with length: %u\n", frameLength);
 

@@ -8,12 +8,13 @@
 * the associated redAddresses
 */
 
-#include "redinterface.h"
 #include<sys/types.h>
 #include<sys/socket.h>
 #include<linux/if_packet.h>
 #include<arpa/inet.h>
 #include<stdio.h>
+#include "redpacket.h"
+#include "redinterface.h"
 
 /**
 * Given the interface index this will
