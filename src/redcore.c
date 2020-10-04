@@ -96,7 +96,7 @@ int main()
 	/* TODO: Spawn a new thread for it */
 
 	/* TODO: Get information from command line or file */
-	int interfaceNumber = 2;
+	int interfaceNumber = 1;
 
 	/* Setup address information */
 	struct sockaddr_ll addr;
@@ -193,6 +193,8 @@ char isBroadcastAddress(long address)
 void ingest(struct redPacket* rp)
 {
 	/* TODO: Implement the redControl handler */
+
+	printf("Ingestion happenine\n");
 
 	/**
 	* If the protocol type is 0, then
