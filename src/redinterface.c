@@ -55,6 +55,9 @@ struct redInterface* createInterface(int if_index)
 		{
 			/* Create a new redInterface */
 			interface = malloc(sizeof(struct redInterface));
+
+			/* Set it up */
+			interface->sockFD = sockFD;
 		}
 		/* If the bind failed */
 		else
