@@ -6,7 +6,7 @@ clean:
 	rm testSend
 	
 redcore:
-	gcc redcore.c redpacket.c route.c redhost.c redinterface.c -o redcore #-Werror=conversion -Werror=sign-compare
+	gcc redcore.c redpacket.c route.c redhost.c redinterface.c -o redcore -Wconversion -Wsign-compare
 
 redctl:
 	gcc redctl.c -o redctl
