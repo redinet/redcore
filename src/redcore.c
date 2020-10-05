@@ -236,7 +236,7 @@ char startProcessor()
 	void* processorStack = mmap(0, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_GROWSDOWN, -1, 0);
 
 	/* If the memory map was successful */
-	if(processorStack != (long)-1)
+	if(processorStack != -1)
 	{
 		/* Create new process (sharing memory with me) except the stack (TODO: Add CLONE_THREAD) */
 		int procPID = clone(&processorLoop, processorStack+4096, CLONE_VM, NULL);
