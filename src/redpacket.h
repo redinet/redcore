@@ -14,16 +14,16 @@
 struct redPacket
 {
 	/* Version */
-	char version;
+	unsigned char version;
 
 	/* Source address */
-	long source;
+	unsigned long source;
 
 	/* Destination address */
-	long destination;
+	unsigned long destination;
 
 	/* Time-to-live value */
-	char ttl;
+	unsigned char ttl;
 
 	/* Protocol type */
 	int type;

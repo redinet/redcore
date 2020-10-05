@@ -52,10 +52,10 @@ struct redPacket* decode(char* buffer)
 	packet->length = ntohl(*(int*)(buffer+1+8+8+1+4));
 
 	/* Allocate the payload buffer */
-	packet->payload = malloc((unsigned int)packet->length);
+	packet->payload = malloc(packet->length);
 
 	/* Copy over the payload into the buffer */
-	for(unsigned int i = 0; i < packet->length; i++)
+	for(int i = 0; i < packet->length; i++)
 	{
 		*(packet->payload+i) = *(buffer+1+8+8+1+4+4+i);
 	}
@@ -94,7 +94,7 @@ char* encode(struct redPacket* packet)
 	*((int*)(buffer+1+8+8+1+4)) = htonl(packet->length);
 
 	/* Encode the payload (TODO: Perhaps use memcpy) */
-	for(unsigned int i = 0; i < packet->length; i++)
+	for(int i = 0; i < packet->length; i++)
 	{
 		*(buffer+1+8+8+1+4+4+i) = *(packet->payload+i);
 	}
