@@ -8,6 +8,8 @@
 * the associated redAddresses
 */
 
+#include<pthread.h>
+
 /**
 * redQueue
 *
@@ -35,9 +37,24 @@ struct redInterface
 	/* Socket file descriptor for this interface */
 	int sockFD;
 
+	/* The send queue */
+	struct redQueueNode* sendQ;
+	pthread_mutex_t sendQLock;
+
+	/* The receive queue */
+	struct redQueueNode* recvQ;
+	pthread_mutex_t recvQLock;
+
 	/* Attached redAddresses */
 	char addrCount;
 	long* addrs;
 };
 
+enum Queue
+{
+	RECV, SEND
+};
+
+
 struct redInterface* createInterface(int);
+char appendQueue(struct redInterface*, enum Queue, struct redPacket);

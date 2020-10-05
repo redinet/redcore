@@ -16,6 +16,92 @@
 #include "redpacket.h"
 #include "redinterface.h"
 #include<stdlib.h>
+#include<pthread.h>
+
+/**
+* Append to the given queue
+*
+* Double pointer (needed for queue init case)
+*/
+char appendQueue(struct redInterface* interface, enum Queue queue, struct redPacket packet)
+{
+	printf("appendQueue: Adding packet to queue...\n");
+
+	/* Status of initialization operation */
+	char status = 1;
+
+	/* The chosen queue */
+	struct redQueueNode** queueVariable;
+
+	/* Choose the queue and also lock it */
+	if(queue == RECV)
+	{
+		queueVariable = &interface->recvQ;
+		pthread_mutex_lock(&interface->recvQLock);
+	}
+	else
+	{
+		queueVariable = &interface->sendQ;
+		pthread_mutex_lock(&interface->sendQLock);
+	}
+
+
+	/* If the queue is not empty */
+	if(*queueVariable)
+	{
+		/* Create a new queue node */
+		struct redQueueNode* newQueueNode = malloc(sizeof(struct redQueueNode));
+
+		/* TODO: Malloc error */
+
+		/* Set the redPacket */
+		(*queueVariable)->packet = packet;
+
+		/* Set the next node to NULL */
+		(*queueVariable)->next = NULL;
+	
+		/* TODO: Append to queue */
+		struct redQueueNode* currentQueueNode = *queueVariable;
+		while(currentQueueNode->next)
+		{
+			/* Move to the next node */
+			currentQueueNode = currentQueueNode->next;
+		}
+
+		/* Append the new queue node */
+		currentQueueNode->next = newQueueNode;
+	}
+	/*If the queue is empty */
+	else
+	{
+		/* Initialize the queue */
+		*queueVariable = malloc(sizeof(struct redQueueNode));
+
+		/* Set the redPacket */
+		(*queueVariable)->packet = packet;
+
+		/* Set the next node to NULL */
+		(*queueVariable)->next = NULL;
+	}
+
+
+
+	if(queue == RECV)
+	{
+		pthread_mutex_unlock(&interface->recvQLock);
+	}
+	else
+	{
+		pthread_mutex_unlock(&interface->sendQLock);
+	}
+
+
+	printf("appendQueue: Adding packet to queue... [done]\n");
+
+
+
+	return status;
+}
 
 /**
 * Given the interface index this will
@@ -60,6 +146,14 @@ struct redInterface* createInterface(int if_index)
 
 			/* Set it up */
 			interface->sockFD = sockFD;
+
+			/* Zero the queues */
+			interface->sendQ = NULL;
+			interface->recvQ = NULL;
+
+			/* Setup queue mutexes */
+			pthread_mutex_init(&interface->sendQLock, 0);
+			pthread_mutex_init(&interface->recvQLock, 0);
 		}
 		/* If the bind failed */
 		else

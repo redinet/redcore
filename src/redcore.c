@@ -214,13 +214,15 @@ void startEngine()
 
 /**
 * Processor loop
-
 *
 * TODO: To be implemented
 */
 void processorLoop()
 {
 	printf("bruh\n");
+
+
+	
 	while(1)
 	{
 		//printf("Bababooey\n");
@@ -319,7 +321,7 @@ void packetLoop()
 	char* pktBuffer;
 
 	/* Current interface we are on */
-	struct redInterface currentInterface = *interfaces;
+	struct redInterface* currentInterface = interfaces;
 	long curr = 0;
 
 
@@ -336,7 +338,7 @@ void packetLoop()
 		* the Ethernet frame from the kernel's
 		* queue for this process.
 		*/
-		long frameLength = recv(currentInterface.sockFD, NULL, 0, MSG_PEEK|MSG_TRUNC|MSG_DONTWAIT);
+		long frameLength = recv(currentInterface->sockFD, NULL, 0, MSG_PEEK|MSG_TRUNC|MSG_DONTWAIT);
 
 		/* If there was no error */
 		if(frameLength >= 0)
@@ -349,7 +351,7 @@ void packetLoop()
 			* the Ethernet frame into it
 			*/
 			pktBuffer = malloc(frameLength); /* TODO: NULL check for malloc */
-			int recvStatus = recv(currentInterface.sockFD, pktBuffer, frameLength, 0); /* TODO: Check returned value */
+			int recvStatus = recv(currentInterface->sockFD, pktBuffer, frameLength, 0); /* TODO: Check returned value */
 
 			/* Decode the packet */
 			struct redPacket* rp = decode(pktBuffer+6+6+2);
@@ -361,6 +363,10 @@ void packetLoop()
 			char* pktDescriptor = printPacket(rp);
 			printf("%s\n", pktDescriptor);
 			free(pktDescriptor);
+
+
+			/* TODO: Above, free (rp) and use it as struct (direct) */
+			appendQueue(currentInterface, SEND, *rp);
 
 			/* Only continue if the version is 0 */
 			if(!rp->version)
@@ -432,6 +438,6 @@ void packetLoop()
 			
 		}
 
-		currentInterface = *(interfaces+curr);
+		currentInterface = interfaces+curr;
 	}
 }
