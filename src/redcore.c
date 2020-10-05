@@ -62,7 +62,6 @@
 #include<fcntl.h>
 #include<sys/errno.h>
 #include "redinterface.h"
-#define __GNU_SOURCE
 #include<sched.h>
 #include<linux/sched.h>
 #include<sys/mman.h>
@@ -74,11 +73,14 @@
 */
 void startEngine();
 char startProcessor();
-void processorLoop();
-void packetLoop();
+int iProcessorLoop();
+int eProcessorLoop();
+int iPacketLoop();
+int ePacketLoop();
 void startup(char**, long);
 void process(struct redPacket);
 void ingest(struct redPacket);
+char startSubsystems();
 
 /**
 * Data structures
@@ -188,6 +190,11 @@ void startup(char** interfaceNames, long count)
 	startEngine();
 }
 
+char startAPI()
+{
+	return 1;
+}
+
 /**
 * Initializes the needed data structures
 * and starts the routing engine
@@ -202,17 +209,13 @@ void startEngine()
 
 	/* TODO: Setup redctl sock */
 
-	/* Start the processor */
-	if(startProcessor())
+	/* Start all sub-systems (TODO: Return check) */
+	startSubsystems();
+
+	while(1)
 	{
-		/* Start the packet loop */
-		packetLoop();
+		
 	}
-	else
-	{
-		/* TODO: Tidy up, error handling */
-		printf("Error initializing/starting the packet processor\n");
-	}	
 }
 
 /**
@@ -224,7 +227,7 @@ void startEngine()
 * robin).
 *
 */
-void processorLoop()
+int iProcessorLoop()
 {
 	/* The current interface */
 	struct redInterface* currentInterface;
@@ -287,6 +290,11 @@ void processorLoop()
 	}
 }
 
+
+int eProcessorLoop()
+{
+	
+}
 
 /**
 * Returns true if the given address
@@ -387,6 +395,64 @@ void process(struct redPacket rp)
 }
 
 
+
+
+/**
+* Start the sub-systems
+*
+* Starts the following:
+*
+* 1. Packet loop (ethernet round robin frame dequeue engine)
+* 2. iProcessor (red interface round robin frame processor)
+* 3. eProcessor (protocol sender)
+* 4. redctl control socket
+*/
+char startSubsystems()
+{
+	/* Status of start */
+	char status = 1;
+
+	/* List of worker functions */
+	int (*workers[])() = {&iProcessorLoop, &eProcessorLoop, &iPacketLoop, &ePacketLoop};
+
+	/* Map a page in for the process (thread-grouped) stack */
+	void* processorStacks[4];
+	for(int i = 0; i < 4; i++)
+	{
+		processorStacks[i] = mmap(0, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_GROWSDOWN, -1, 0);
+
+		if(!processorStacks[i])
+		{
+			status = 0;
+			break;
+		}
+	}
+
+	/* If the pages were mapped successfully */
+	if(status)
+	{
+		/* Start each thread */
+		for(int i = 0; i < 4; i++)
+		{
+			int procPID = clone(workers[i], processorStacks[i]+4096, CLONE_VM|CLONE_THREAD|CLONE_SIGHAND, NULL);//, &h1, &h, &h2);
+
+			if(!processorStacks[i])
+			{
+				status = 0;
+				break;
+			}
+		}	
+	}
+	/* If one of the page mappings failed */
+	else
+	{
+		
+	}
+
+	return status;
+}
+
+
 /**
 * Starts the processor
 */
@@ -399,8 +465,8 @@ char startProcessor()
 	if(processorStack != -1)
 	{
 		/* Create new process (sharing memory with me) except the stack (TODO: Add CLONE_THREAD) */
-		int procPID = clone(&processorLoop, processorStack+4096, CLONE_VM|CLONE_THREAD|CLONE_SIGHAND, NULL);//, &h1, &h, &h2);
-		printf("bababba %u\n", procPID);
+		//int procPID = clone(&processorLoop, processorStack+4096, CLONE_VM|CLONE_THREAD|CLONE_SIGHAND, NULL);//, &h1, &h, &h2);
+		// printf("bababba %u\n", procPID);
 
 		return 1;
 	}
@@ -413,7 +479,10 @@ char startProcessor()
 }
 
 
-
+int ePacketLoop()
+{
+	
+}
 
 
 /**
@@ -423,7 +492,7 @@ char startProcessor()
 * are no frames available it moves onto the next
 * interface
 */
-void packetLoop()
+int iPacketLoop()
 {
 	/* Packet buffer space */
 	char* pktBuffer;
