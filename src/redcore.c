@@ -218,44 +218,121 @@ void startEngine()
 *
 * This processes incoming packets from
 * the receive queue of the red interfaces
+* (moves through each interface via round
+* robin).
+*
 */
 void processorLoop()
 {
-	printf("bruh\n");
+	/* The current interface */
+	struct redInterface* currentInterface;
 
-
-	/**
-	* Loops through each redInterface and 
-	*
-	*/
-
+	/* The current offset into the redInterface array */
 	long interfaceID = 0;
-	
+
+	char interfaceName[20];
+
+	/* Loop through each interface, process one packet from receive queue */
 	while(1)
 	{
-		//printf("Bababooey\n");
-		/* The current interface */
-		struct redInterface* currentInterface = interfaces+interfaceID;
+		/* Set the current interface */
+		currentInterface = interfaces+interfaceID;
 
-		pthread_mutex_lock(&currentInterface->recvQLock);
+		/* Print out some information */
+		if_indextoname(currentInterface->index, interfaceName); /* TODO: Error handling, error finding and also overflow */
+		printf("[interfaceReceiveProcessor:%s] Beginning\n", interfaceName);
+
+
+		/* Check if the queue is non-empty */
+		if(!isQueueEmpty(currentInterface, RECV))
+		{
+			printf("[interfaceReceiveProcessor:%s] Queue non empty\n", interfaceName);
+
+			struct redPacket rp = popQueue(currentInterface, RECV);
+
+			/* Print out the redPacket */
+			char* pktDescriptor = printPacket(&rp);
+			printf("%s\n", pktDescriptor);
+			free(pktDescriptor);
+			
+		}
+		/* If the queue is empty */
+		else
+		{
+			printf("[interfaceReceiveProcessor:%s] Queue empty\n", interfaceName);
+		}
+
 		printf("Critical processor\n");
-		pthread_mutex_unlock(&currentInterface->recvQLock);
-		sched_yield();
+
 		
+
+		
+		interfaceID++;
 
 		/* If we are at the end of the interface list */
 		if(interfaceID == interfaceCount)
 		{
 			interfaceID = 0;
 		}
-		else
-		{
-			interfaceID++;
-		}
 
+		printf("[interfaceReceiveProcessor:%s] Ending (sleeping)\n", interfaceName);
+
+		/* Let the receiver run (or anything but me) */
+		sched_yield();
+
+		/* TODO: Don't run all the time also why the fuck would it go brr without anyways */
 		sleep(2);
 	}
 }
+
+
+void process()
+{
+// /* Only continue if the version is 0 */
+			// if(!rp->version)
+			// {
+				// /* TODO: Destination address handling */
+// 
+				// /**
+				// * If the address is a broadcast address
+				// * or one of ours
+				// */
+				// if(isBroadcastAddress(rp->destination) || isLocalAddress(rp->destination))
+				// {
+					// /* Accept the redPacket into the protocol dispatcher */
+					// printf("Packet destined to us\n");
+					// ingest(rp);
+				// }
+				// /* TODO: Multicast handling */
+				// /* If the packet wasn't destined to us */
+				// else
+				// {
+					// /* TODO: Check if forwarding is enabled */
+					// if(isForwarding)
+					// {
+						// /* TODO: Implement forwarding */
+// 
+						// /* TODO: Implement ttl check before anything else */
+					// }
+					// else
+					// {
+						// /* Drop it */
+						// printf("Received packet with address not destined to us, dropping (forwarding disabled)\n");
+					// }
+				// }
+// 
+				// 
+				// /* TODO: Possible source address handling */
+// 
+				// /* TODO: Dependant on destination address, check TTL */
+			// }
+			// /* If not, then drop the redPacket */
+			// else
+			// {
+				// printf("Dropping redPacket with non-zero version field: %u\n", rp->version);
+			// }
+}
+
 
 /**
 * Starts the processor
@@ -394,51 +471,9 @@ void packetLoop()
 
 
 			/* TODO: Above, free (rp) and use it as struct (direct) */
-			appendQueue(currentInterface, SEND, *rp);
+			appendQueue(currentInterface, RECV, *rp);
 
-			/* Only continue if the version is 0 */
-			if(!rp->version)
-			{
-				/* TODO: Destination address handling */
-
-				/**
-				* If the address is a broadcast address
-				* or one of ours
-				*/
-				if(isBroadcastAddress(rp->destination) || isLocalAddress(rp->destination))
-				{
-					/* Accept the redPacket into the protocol dispatcher */
-					printf("Packet destined to us\n");
-					ingest(rp);
-				}
-				/* TODO: Multicast handling */
-				/* If the packet wasn't destined to us */
-				else
-				{
-					/* TODO: Check if forwarding is enabled */
-					if(isForwarding)
-					{
-						/* TODO: Implement forwarding */
-
-						/* TODO: Implement ttl check before anything else */
-					}
-					else
-					{
-						/* Drop it */
-						printf("Received packet with address not destined to us, dropping (forwarding disabled)\n");	
-					}
-				}
-
-				
-				/* TODO: Possible source address handling */
-
-				/* TODO: Dependant on destination address, check TTL */
-			}
-			/* If not, then drop the redPacket */
-			else
-			{
-				printf("Dropping redPacket with non-zero version field: %u\n", rp->version);
-			}
+			/* TODO: Free `rp` (as we copy it in above) */
 		}
 		/* If there was an error */
 		else

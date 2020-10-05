@@ -55,10 +55,10 @@ char appendQueue(struct redInterface* interface, enum Queue queue, struct redPac
 		/* TODO: Malloc error */
 
 		/* Set the redPacket */
-		(*queueVariable)->packet = packet;
+		newQueueNode->packet = packet;
 
 		/* Set the next node to NULL */
-		(*queueVariable)->next = NULL;
+		newQueueNode->next = NULL;
 	
 		/* TODO: Append to queue */
 		struct redQueueNode* currentQueueNode = *queueVariable;
@@ -101,6 +101,82 @@ char appendQueue(struct redInterface* interface, enum Queue queue, struct redPac
 
 
 	return status;
+}
+
+/**
+* Returns true (1) if the queue is empty
+* false (0) otherwise
+*/
+char isQueueEmpty(struct redInterface* interface, enum Queue queue)
+{
+	/* Whether or not the queue is empty */
+	char queueEmpty;
+
+	/* The chosen queue */
+	struct redQueueNode** queueVariable;
+
+	/* Choose the queue and also lock it */
+	if(queue == RECV)
+	{
+		queueVariable = &interface->recvQ;
+		pthread_mutex_lock(&interface->recvQLock);
+	}
+	else
+	{
+		queueVariable = &interface->sendQ;
+		pthread_mutex_lock(&interface->sendQLock);
+	}
+
+	
+	queueEmpty = *queueVariable == NULL;
+
+
+	if(queue == RECV)
+	{
+		pthread_mutex_unlock(&interface->recvQLock);
+	}
+	else
+	{
+		pthread_mutex_unlock(&interface->sendQLock);
+	}
+
+	return queueEmpty;
+}
+
+/* TODO: Implement me */
+struct redPacket popQueue(struct redInterface* interface, enum Queue queue)
+{
+	/* The chosen queue */
+	struct redQueueNode** queueVariable;
+
+	/* Choose the queue and also lock it */
+	if(queue == RECV)
+	{
+		queueVariable = &interface->recvQ;
+		pthread_mutex_lock(&interface->recvQLock);
+	}
+	else
+	{
+		queueVariable = &interface->sendQ;
+		pthread_mutex_lock(&interface->sendQLock);
+	}
+
+	/* Get the head of the queue */
+	struct redQueueNode* headNode = *queueVariable;
+
+	/* Set the next */
+	*queueVariable = headNode->next;
+
+	if(queue == RECV)
+	{
+		pthread_mutex_unlock(&interface->recvQLock);
+	}
+	else
+	{
+		pthread_mutex_unlock(&interface->sendQLock);
+	}
+
+	return headNode->packet;;
 }
 
 /**
@@ -154,6 +230,9 @@ struct redInterface* createInterface(int if_index)
 			/* Setup queue mutexes */
 			pthread_mutex_init(&interface->sendQLock, 0);
 			pthread_mutex_init(&interface->recvQLock, 0);
+
+			/* Set the index (socket is bound, only used for informative purposes) */
+			interface->index = if_index;
 		}
 		/* If the bind failed */
 		else

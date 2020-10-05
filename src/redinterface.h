@@ -48,6 +48,8 @@ struct redInterface
 	/* Attached redAddresses */
 	char addrCount;
 	long* addrs;
+
+	int index;
 };
 
 enum Queue
@@ -58,3 +60,5 @@ enum Queue
 
 struct redInterface* createInterface(int);
 char appendQueue(struct redInterface*, enum Queue, struct redPacket);
+char isQueueEmpty(struct redInterface*, enum Queue);
+struct redPacket popQueue(struct redInterface*, enum Queue);
