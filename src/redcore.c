@@ -110,6 +110,8 @@ void config(char* filename)
 /* List of interface names to run on*/
 char** interfaceNames;
 
+char isBroadcastAddress(unsigned long);
+
 int main(int argc, char** args)
 {
 	/* TODO: Run config (move this elsewhere) */
@@ -206,6 +208,7 @@ void startEngine()
 	else
 	{
 		/* TODO: Tidy up, error handling */
+		printf("Error initializing/starting the packet processor\n");
 	}	
 }
 
@@ -235,7 +238,7 @@ char startProcessor()
 	/* If the memory map was successful */
 	if(processorStack != (long)-1)
 	{
-		/* Create the new thread (child process in my thread group) TODO: Add CLONE_THREAD */
+		/* Create new process (sharing memory with me) except the stack (TODO: Add CLONE_THREAD) */
 		int procPID = clone(&processorLoop, processorStack+4096, CLONE_VM, NULL);
 		printf("bababba %u\n", procPID);
 
@@ -271,7 +274,7 @@ char isLocalAddress(long address)
 * @param true if address is broadcast,
 * false otherwise
 */
-char isBroadcastAddress(long address)
+char isBroadcastAddress(unsigned long address)
 {
 	/* The broadcast address is all 1-bits/highest-value unsigned long */
 	return address == -1;
