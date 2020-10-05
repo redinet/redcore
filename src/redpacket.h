@@ -29,7 +29,7 @@ struct redPacket
 	int type;
 
 	/* Length */
-	int length;
+	unsigned int length;
 
 	/* Payload */
 	char* payload;

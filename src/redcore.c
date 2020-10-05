@@ -62,6 +62,7 @@
 #include<fcntl.h>
 #include<sys/errno.h>
 #include "redinterface.h"
+#define __GNU_SOURCE
 #include<sched.h>
 #include<linux/sched.h>
 #include<sys/mman.h>
@@ -215,17 +216,44 @@ void startEngine()
 /**
 * Processor loop
 *
-* TODO: To be implemented
+* This processes incoming packets from
+* the receive queue of the red interfaces
 */
 void processorLoop()
 {
 	printf("bruh\n");
 
 
+	/**
+	* Loops through each redInterface and 
+	*
+	*/
+
+	long interfaceID = 0;
 	
 	while(1)
 	{
 		//printf("Bababooey\n");
+		/* The current interface */
+		struct redInterface* currentInterface = interfaces+interfaceID;
+
+		pthread_mutex_lock(&currentInterface->recvQLock);
+		printf("Critical processor\n");
+		pthread_mutex_unlock(&currentInterface->recvQLock);
+		sched_yield();
+		
+
+		/* If we are at the end of the interface list */
+		if(interfaceID == interfaceCount)
+		{
+			interfaceID = 0;
+		}
+		else
+		{
+			interfaceID++;
+		}
+
+		sleep(2);
 	}
 }
 
@@ -241,7 +269,7 @@ char startProcessor()
 	if(processorStack != -1)
 	{
 		/* Create new process (sharing memory with me) except the stack (TODO: Add CLONE_THREAD) */
-		int procPID = clone(&processorLoop, processorStack+4096, CLONE_VM, NULL);
+		int procPID = clone(&processorLoop, processorStack+4096, CLONE_VM|CLONE_THREAD|CLONE_SIGHAND, NULL);//, &h1, &h, &h2);
 		printf("bababba %u\n", procPID);
 
 		return 1;
