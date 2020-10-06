@@ -67,6 +67,7 @@
 #include<sys/mman.h>
 #include <net/if.h>
 #include "redhost.h"
+#include<unistd.h>
 
 /**
 * Prototypes (TODO: Own header file)
@@ -81,6 +82,7 @@ void startup(char**, long);
 void process(struct redPacket);
 void ingest(struct redPacket);
 char startSubsystems();
+void tidyUp();
 
 /**
 * Data structures
@@ -147,7 +149,7 @@ void startup(char** interfaceNames, long count)
 	/* Create all interfaces */
 	unsigned long i = 0;
 	long interfaceOffset = 0;
-	while(i < (unsigned long)count)
+	while(i < count)
 	{
 		/* Get the current interface's name */
 		char* currentInterfaceName = *(interfaceNames+i);
@@ -216,6 +218,19 @@ void startEngine()
 	{
 		
 	}
+
+	/* Close up shop */
+	tidyUp();
+}
+
+/**
+* Tidy up
+*
+* Tbh we could just exit
+*/
+void tidyUp()
+{
+	/* TODO: Implement me */
 }
 
 /**
@@ -421,7 +436,7 @@ char startSubsystems()
 	{
 		processorStacks[i] = mmap(0, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_GROWSDOWN, -1, 0);
 
-		if(!processorStacks[i])
+		if(processorStacks[i] == -1)
 		{
 			status = 0;
 			break;
@@ -434,9 +449,10 @@ char startSubsystems()
 		/* Start each thread */
 		for(int i = 0; i < 4; i++)
 		{
-			int procPID = clone(workers[i], processorStacks[i]+4096, CLONE_VM|CLONE_THREAD|CLONE_SIGHAND, NULL);//, &h1, &h, &h2);
+			/* Spawn the thread-grouped process (thread) */
+			int procPID = clone(workers[i], processorStacks[i]+4096, CLONE_VM|CLONE_THREAD|CLONE_SIGHAND, NULL);
 
-			if(!processorStacks[i])
+			if(procPID)
 			{
 				status = 0;
 				break;
@@ -446,7 +462,18 @@ char startSubsystems()
 	/* If one of the page mappings failed */
 	else
 	{
-		
+		printf("subSystemInit: An mmap() failed\n");
+	}
+
+	/* If the clones were done successfully */
+	if(status)
+	{
+		printf("subSystemInit: Completed\n");
+	}
+	/* If one of the clones failed */
+	else
+	{
+		printf("subSystemInit: A clone() failed\n");
 	}
 
 	return status;
