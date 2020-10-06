@@ -452,7 +452,7 @@ char startSubsystems()
 			/* Spawn the thread-grouped process (thread) */
 			int procPID = clone(workers[i], processorStacks[i]+4096, CLONE_VM|CLONE_THREAD|CLONE_SIGHAND, NULL);
 
-			if(procPID)
+			if(procPID == -1)
 			{
 				status = 0;
 				break;
