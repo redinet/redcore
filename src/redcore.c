@@ -575,5 +575,8 @@ int iPacketLoop()
 		}
 
 		currentInterface = interfaces+curr;
+
+		/* Switch away from this thread (run anything but me) */
+		sched_yield();
 	}
 }
