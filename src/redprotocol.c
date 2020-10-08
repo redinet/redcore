@@ -4,9 +4,10 @@
 
 #include "redprotocol.h"
 #include<stdlib.h>
+#include<stdio.h>
 
 /* Head of the linked-list */
-struct redProtocolListNode* head;
+struct redProtocolListNode* protocolHandlerChain;
 
 void addProtocol(struct redProtocol protocol)
 {
@@ -20,9 +21,9 @@ void addProtocol(struct redProtocol protocol)
 	newNode->next = NULL;
 
 	/* If the list is not empty */
-	if(head)
+	if(protocolHandlerChain)
 	{
-		struct redProtocolListNode* currentNode = head;
+		struct redProtocolListNode* currentNode = protocolHandlerChain;
 
 		while(currentNode->next)
 		{
@@ -36,6 +37,8 @@ void addProtocol(struct redProtocol protocol)
 	else
 	{
 		/* Make the new node the list */
-		head = newNode;
+		protocolHandlerChain = newNode;
 	}
+
+	printf("redProtocol: Added new protocol handler '%s'\n", protocol.name);
 }

@@ -30,3 +30,5 @@ struct redProtocolListNode
 	/* Next protocol */
 	struct redProtocolListNode* next;
 };
+
+void addProtocol(struct redProtocol);

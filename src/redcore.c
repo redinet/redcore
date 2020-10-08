@@ -68,6 +68,8 @@
 #include <net/if.h>
 #include "redhost.h"
 #include<unistd.h>
+#include "redprotocol.h"
+#include "redctl.h"
 
 /**
 * Prototypes (TODO: Own header file)
@@ -192,10 +194,6 @@ void startup(char** interfaceNames, long count)
 	startEngine();
 }
 
-char startAPI()
-{
-	return 1;
-}
 
 /**
 * Initializes the needed data structures
@@ -210,6 +208,7 @@ void startEngine()
 	routingTable = newTable();
 
 	/* TODO: Setup redctl sock */
+	startAPI("redctl.sock");
 
 	/* Start all sub-systems (TODO: Return check) */
 	startSubsystems();
@@ -281,10 +280,6 @@ int iProcessorLoop()
 		{
 			printf("[interfaceReceiveProcessor:%s] Queue empty\n", interfaceName);
 		}
-
-		printf("Critical processor\n");
-
-		
 
 		
 		interfaceID++;
@@ -409,7 +404,18 @@ void process(struct redPacket rp)
 	}
 }
 
+void initializeProtocolHandlers(struct redProtocol* protocols, long count)
+{
+	/* TODO: Loop through provided protocol handlers and add them */
+	for(long i = 0; i < count; i++)
+	{
+		/* The current protocol */
+		struct redProtocol currentProtocol = *(protocols+count);
 
+		/* Add the current protocol */
+		addProtocol(currentProtocol);
+	}
+}
 
 
 /**
@@ -426,6 +432,11 @@ char startSubsystems()
 {
 	/* Status of start */
 	char status = 1;
+
+
+	/* Setup protocol handler sockets */
+	initializeProtocolHandlers(69, 0);
+	
 
 	/* List of worker functions */
 	int (*workers[])() = {&iProcessorLoop, &eProcessorLoop, &iPacketLoop, &ePacketLoop};
@@ -450,7 +461,7 @@ char startSubsystems()
 		for(int i = 0; i < 4; i++)
 		{
 			/* Spawn the thread-grouped process (thread) */
-			int procPID = clone(workers[i], processorStacks[i]+4096, CLONE_VM|CLONE_THREAD|CLONE_SIGHAND, NULL);
+			unsigned int procPID = clone(workers[i], processorStacks[i]+4096, CLONE_VM|CLONE_THREAD|CLONE_SIGHAND, NULL);
 
 			if(procPID == -1)
 			{

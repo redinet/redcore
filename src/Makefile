@@ -1,15 +1,11 @@
-build: redcore redctl
+build: redcore
 
 clean:
 	rm redcore
-	rm redctl
 	rm testSend
 	
 redcore:
-	gcc redcore.c redpacket.c route.c redhost.c redinterface.c -o redcore -Wconversion -Wsign-compare
-
-redctl:
-	gcc redctl.c -o redctl
+	gcc redcore.c redpacket.c route.c redhost.c redinterface.c redprotocol.c redctl.c -o redcore -Wconversion -Wsign-compare
 
 testSend:
 	gcc testSend.c redpacket.c -o testSend
